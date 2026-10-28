@@ -993,6 +993,10 @@ static int ath6kl_wmi_disconnect_event_rx(struct wmi *wmi, u8 *datap, int len,
 		   sec_conv_mac(ev->bssid),
 		   ev->disconn_reason, ev->assoc_resp_len);
 
+	if (ev->assoc_resp_len)
+		print_hex_dump(KERN_ERR, "assoc_resp: ", DUMP_PREFIX_OFFSET, 16, 1,
+			       ev->assoc_info, ev->assoc_resp_len, false);
+
 	wmi->is_wmm_enabled = false;
 
 	ath6kl_disconnect_event(vif, ev->disconn_reason,
@@ -2685,6 +2689,8 @@ static int ath6kl_set_bitrate_mask64(struct wmi *wmi, u8 if_idx,
 		if (band == IEEE80211_BAND_5GHZ)
 			ratemask[band] =
 				mask->control[band].legacy << 4;
+		else if (band == IEEE80211_BAND_2GHZ)
+			ratemask[band] |= 0x0f; /* 1, 2, 5.5, 11 Mbps CCK basic rates */
 
 		/* copy mcs rate mask */
 		mcsrate = mask->control[band].mcs[1];
@@ -2735,6 +2741,8 @@ static int ath6kl_set_bitrate_mask32(struct wmi *wmi, u8 if_idx,
 		if (band == IEEE80211_BAND_5GHZ)
 			ratemask[band] =
 				mask->control[band].legacy << 4;
+		else if (band == IEEE80211_BAND_2GHZ)
+			ratemask[band] |= 0x0f; /* 1, 2, 5.5, 11 Mbps CCK basic rates */
 
 		/* copy mcs rate mask */
 		mcsrate = mask->control[band].mcs[0];
